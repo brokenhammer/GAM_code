@@ -38,25 +38,24 @@ niter = 2;
 dt = 0.1;
 nt=20;
 %% initialize
-%g0 = 0.01 * exp(-vpara.^2/2/vti^2) .* exp(-vperp.^2/2/vti^2) .* exp(-(tspace/2).^2) + 0 * 1i;
-h0 = 0.01 * exp(-vpara.^2/2/vti^2) .* exp(-vperp.^2/2/vti^2) .* exp(-(tspace/2).^2) + 0 * 1i;
+g0 = 0.01 * exp(-vpara.^2/2/vti^2) .* exp(-vperp.^2/2/vti^2) .* exp(-(tspace/2).^2) + 0 * 1i;
+% h0 = 0.01 * exp(-vpara.^2/2/vti^2) .* exp(-vperp.^2/2/vti^2) .* exp(-(tspace/2).^2) + 0 * 1i;
 omega_di = -kr*rhoti/vti/R0*(0.5*vperp.^2+vpara.^2).*sin(tspace);
 Fm = n0/(sqrt(2*pi))^3/vti^3*exp(-vpara.^2/2/vti^2) .* exp(-vperp.^2/2/vti^2);
 gamma0 = besseli(0,kr^2*rhoti^2)*exp(-kr^2*rhoti^2);
 deltan = zeros(theta_grid);
+pgpth = zeros(theta_grid, vpara_grid, vperp_grid);
+dgdt1 = pgpth;
+dgdt2 = pgpth;
 %RK 4 for h=h+dhdt*dt
+
 for it = 1:nt
+    g = g0;
+    %calc dgdt1
     % integrate for phi
-    for ith = theta_grid
-    for ivp = 1:vpara_grid
-        for ivc = 1:vperp_grid
-            vpe = vperp_array(ivc);
-            krrho = kr * vpe / omega0;
-            deltan(ith) = dletan(ith) + vpe * h0(ith,icp,ivc) * dvpe * dvpa * besselj(0,krrho);
-        end
-    end
-    end
+    phi = calc_phi_g(g,vperp,omega0,dvpe,dvpa,kr);
+    dgdt1 = gtime(g,phi,omega_di,q,R0,pgpth,kr,vperp,omega0,vpara);
     
-    phi = deltan ./ (e * n0 / Ti);
-    
+    %calc dgdt2
+    g = g0 + dgdt1*dt/2;
     
