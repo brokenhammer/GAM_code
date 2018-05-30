@@ -58,4 +58,4 @@ for it = 1:nt
     
     %calc dgdt2
     g = g0 + dgdt1*dt/2;
-    
+end
